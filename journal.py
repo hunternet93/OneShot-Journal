@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import threading
 
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
@@ -31,6 +30,9 @@ class Journal(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
+        try: self.base_path = sys._MEIPASS
+        except AttributeError: self.base_path = os.path.abspath('.')
+        
         self.stay_on_top = False
         self.setFocusPolicy(Qt.ClickFocus)
                 
@@ -46,7 +48,7 @@ class Journal(QWidget):
         self.show()
     
     def change_image(self, name):
-        self.pixmap = QPixmap('images/{}.png'.format(name))
+        self.pixmap = QPixmap(os.path.join(self.base_path, 'images', '{}.png'.format(name)))
         self.label.setPixmap(self.pixmap)
 
 if __name__ == '__main__':
