@@ -2,11 +2,14 @@ import os
 import sys
 import time
 
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QRect, QRectF, QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QPainter
 
 pipe_path = '/tmp/oneshot-pipe'
+
+try: base_path = sys._MEIPASS
+except AttributeError: base_path = os.path.abspath('.')
 
 class WatchPipe(QThread):
     change_image = pyqtSignal(str)
@@ -29,17 +32,11 @@ class WatchPipe(QThread):
 class Journal(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        try: self.base_path = sys._MEIPASS
-        except AttributeError: self.base_path = os.path.abspath('.')
-        
-        self.stay_on_top = False
-        self.setFocusPolicy(Qt.ClickFocus)
                 
         self.label = QLabel(self)
         self.change_image('default')
         
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags())
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle('OneShot Journal')
         self.setMinimumSize(800, 600)
@@ -48,15 +45,34 @@ class Journal(QWidget):
         self.show()
     
     def change_image(self, name):
-        self.pixmap = QPixmap(os.path.join(self.base_path, 'images', '{}.png'.format(name)))
+        self.pixmap = QPixmap(os.path.join(base_path, 'images', '{}.png'.format(name)))
         self.label.setPixmap(self.pixmap)
+
+class Niko(QWidget):
+    def __init__(self, *args, **kwargs):
+        self.start_x, self.start_y = kwargs['start_x'], kwargs['start_y']
+        del kwargs['start_x'], kwargs['start_y']
+        
+        super().__init__(*args, **kwargs)
+        
+        self.frames = [QPixmap(os.path.join(base_path, 'images', 'niko{}.png'.format(n)) for n in range(1,4))]
+
+        self.setBackgroundRole(QPalette.Base)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)        
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    journal = Journal()
+
+    if len(sys.argv) == 3:
+        # "Niko-leaves-the-screen" mode
+        x, y = int(sys.argv[1]), int(sys.argv[2])
     
-    thread = WatchPipe()
-    thread.change_image.connect(journal.change_image)
-    thread.start()
+    else:
+        # Author's Journal mode
+        journal = Journal()
+    
+        thread = WatchPipe()
+        thread.change_image.connect(journal.change_image)
+        thread.start()
     
     app.exec_()
