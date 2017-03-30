@@ -1,20 +1,38 @@
 OneShot Journal
 ===============
 
-This is a Linux-compatible reimplementation of the Author's Journal, a element in the game [OneShot](http://oneshot-game.com).
+This is a Linux- and macOS-compatible reimplementation of the Author's Journal, a element in the game [OneShot](http://oneshot-game.com).
 
 Usage
 -----
 
-This journal requires PyQt5 to run. On Debian/Ubuntu-based systems, install via the following command:
+This journal requires Python 3.x and PyQt5 to run. On macOS or Debian/Ubuntu-based systems, install via one of the following commands:
 
-    sudo apt-get install python3-pyqt5
+    brew install pyqt5                   # macOS (Homebrew)
+    port install pyqt5                   # macOS (MacPorts)
+    sudo apt-get install python3-pyqt5   # Ubuntu/Debian
 
 This will install PyQt5 and all necessary files. Next, extract the images from the original OneShot journal program using the instructions in the following section, then use the following command to start the journal:
 
     python3 journal.py
 
 Start OneShot and play normally.
+
+Building the app bundle
+-----------------------
+
+To create the macOS app bundle, PyInstaller is required.  Install via one of the following commands:
+
+	brew install pyinstaller   # macOS (Homebrew)
+	port install pyinstaller   # macOS (MacPorts)
+	
+*Note: If you plan to use Python 3.6, at the time of this writing, the stable release (3.2.1) of PyInstaller only supports up to Python 3.5, however the [development build](http://www.pyinstaller.org/downloads.html) implements Python 3.6 support.*
+
+Now that everything is installed, let's create our app bundle:
+
+	pyinstaller journal.spec --onefile --windowed
+
+This should collect all the required runtime files and create the bundle in `dist/_______.app`.
 
 Extracting the images
 ---------------------
